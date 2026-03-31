@@ -230,7 +230,6 @@ tbody tr:hover{background:var(--surface-2)}
   <!-- 탭 -->
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('analytics',this)">📊 애널리틱스</button>
-    <button class="tab-btn" onclick="switchTab('manage',this)">📋 신청자 관리</button>
   </div>
 
   <!-- 탭 1: 애널리틱스 -->
@@ -333,59 +332,7 @@ tbody tr:hover{background:var(--surface-2)}
 
   </div><!-- /tab-analytics -->
 
-  <!-- 탭 2: 신청자 관리 -->
-  <div class="tab-panel" id="tab-manage">
 
-    <!-- 툴바 -->
-    <div class="manage-toolbar">
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="mSearchInput" placeholder="이름, 이메일 검색..." oninput="mApplyFilters()">
-      </div>
-      <button class="filter-btn active" onclick="mSetStatus('all',this)">전체</button>
-      <button class="filter-btn" onclick="mSetStatus('new',this)">🔵 신규</button>
-      <button class="filter-btn" onclick="mSetStatus('contacted',this)">🟡 연락함</button>
-      <button class="filter-btn" onclick="mSetStatus('confirmed',this)">🟢 확정</button>
-      <button class="filter-btn" onclick="mSetStatus('cancelled',this)">🔴 취소</button>
-      <select class="m-select" id="mUtmFilter" onchange="mApplyFilters()">
-        <option value="">유입경로 전체</option>
-        <option value="direct">직접 유입</option>
-        <option value="meta">메타 광고</option>
-        <option value="link">링크 유입</option>
-      </select>
-      <span style="margin-left:auto;font-size:.8rem;color:var(--text-muted)" id="mFilteredCount">0건</span>
-    </div>
-
-    <!-- 테이블 -->
-    <div class="manage-table-card">
-      <div class="manage-table-header">
-        <div class="table-card-title">사전예약 신청 목록</div>
-        <span style="font-size:.82rem;color:var(--text-sub)" id="mTableCount">0건</span>
-      </div>
-      <div class="m-table-scroll">
-        <table class="m-table">
-          <thead>
-            <tr>
-              <th>신청 시간</th>
-              <th>이름</th>
-              <th>이메일</th>
-              <th>유입경로</th>
-              <th>상태</th>
-              <th>메모</th>
-              <th style="text-align:center">관리</th>
-            </tr>
-          </thead>
-          <tbody id="mTbody">
-            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">데이터를 불러오는 중...</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="m-pagination">
-        <div class="m-page-info" id="mPageInfo">—</div>
-        <div class="m-page-btns" id="mPageBtns"></div>
-      </div>
-    </div>
-  </div><!-- /tab-manage -->
 
   </div><!-- /main-inner -->
 </main>
@@ -729,18 +676,15 @@ async function exportExcel() {
   XLSX.utils.book_append_sheet(wb, wsSummary, '요약 지표');
 
   // ══════════════════════════════════════════
-  // 시트 2: 📋 사전예약 신청 목록 (기본 컬럼)
+  // 시트 2: 📋 사전예약 신청 목록
   // ══════════════════════════════════════════
-  var subHeader = ['신청시간','이름','연락처','이메일','성별','연령대','유입경로구분','UTM Source','UTM Medium','UTM Campaign'];
+  var subHeader = ['신청시간','이름','이메일','유입경로구분','UTM Source','UTM Medium','UTM Campaign'];
   var subRows = [subHeader];
   d.submissions.slice().reverse().forEach(function(s){
     subRows.push([
       new Date(s.timestamp).toLocaleString('ko-KR'),
       s.name,
-      s.phone,
       s.email||'',
-      GENDER_LABELS_XL[s.gender]||(s.gender||'미입력'),
-      AGE_LABELS_XL[s.age]||(s.age||'미입력'),
       classifySrc(s.utm_source),
       s.utm_source||'direct',
       s.utm_medium||'',
@@ -750,7 +694,7 @@ async function exportExcel() {
   if(d.submissions.length === 0) subRows.push(['신청 데이터 없음']);
 
   var wsSub = XLSX.utils.aoa_to_sheet(subRows);
-  wsSub['!cols'] = [{wch:20},{wch:10},{wch:14},{wch:24},{wch:6},{wch:8},{wch:10},{wch:14},{wch:14},{wch:20}];
+  wsSub['!cols'] = [{wch:20},{wch:12},{wch:26},{wch:12},{wch:16},{wch:16},{wch:22}];
   XLSX.utils.book_append_sheet(wb, wsSub, '사전예약 신청목록');
 
   var today = new Date().toISOString().split('T')[0];
