@@ -256,7 +256,7 @@ tbody tr:hover{background:var(--surface-2)}
       <div class="stat-card-value" id="totalSubmissions">0</div>
       <div class="stat-card-change up" id="subsChange">오늘 +0</div>
       <div class="stat-card-sub">전환율 <span class="conv-rate" id="subConvRate">0%</span></div>
-      <div class="stat-card-desc">이름·연락처 입력 후 "신청하기" 완료한 수<br>전환율 = 신청 완료 / 페이지 방문 수</div>
+      <div class="stat-card-desc">이름·이메일 입력 후 "신청하기" 완료한 수<br>전환율 = 신청 완료 / 페이지 방문 수</div>
     </div>
     <div class="stat-card">
       <div class="stat-card-label"><div class="stat-card-icon" style="background:var(--violet-dim);color:var(--violet);">📈</div>클릭→신청 전환율</div>
@@ -295,29 +295,15 @@ tbody tr:hover{background:var(--surface-2)}
     </div>
   </div>
 
-  <!-- Demographics: Gender + Age -->
-  <div class="demo-row">
-    <div class="demo-chart">
-      <div class="chart-card-title">성별 분포</div>
-      <div class="chart-card-subtitle">사전예약 신청 기준</div>
-      <div class="demo-bars" id="genderChart"></div>
-    </div>
-    <div class="demo-chart">
-      <div class="chart-card-title">연령대 분포</div>
-      <div class="chart-card-subtitle">사전예약 신청 기준</div>
-      <div class="demo-bars" id="ageChart"></div>
-    </div>
-  </div>
-
-  <!-- Submissions Table with gender/age -->
+  <!-- Submissions Table -->
   <div class="table-card">
     <div class="table-card-header">
       <div class="table-card-title">📋 사전예약 신청 목록</div>
       <div style="font-size:.85rem;color:var(--text-sub);" id="subCount">0건</div>
     </div>
     <div style="overflow-x:auto;">
-      <table><thead><tr><th>시간</th><th>이름</th><th>연락처</th><th>이메일</th><th>성별</th><th>연령대</th><th>UTM Source</th></tr></thead>
-      <tbody id="submissionsTable"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">데이터가 없습니다</td></tr></tbody></table>
+      <table style="table-layout:fixed;width:100%;"><colgroup><col style="width:180px"><col style="width:120px"><col style="width:auto"><col style="width:140px"></colgroup><thead><tr><th>시간</th><th>이름</th><th>이메일</th><th>UTM Source</th></tr></thead>
+      <tbody id="submissionsTable"><tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">데이터가 없습니다</td></tr></tbody></table>
     </div>
   </div>
 
@@ -420,8 +406,6 @@ const BUTTON_TAGS = {
   'nav_cta':'tag-blue','hero_cta_primary':'tag-green',
   'hero_cta_secondary':'tag-amber','bottom_cta':'tag-coral','floating_cta':'tag-violet'
 };
-const GENDER_LABELS = {'male':'남성','female':'여성','other':'기타'};
-const AGE_LABELS = {'10s':'10대','20s':'20대','30s':'30대','40s':'40대','50+':'50대 이상'};
 function getButtonLabel(id) { return BUTTON_LABELS[id]||id; }
 function getButtonTag(id) { return '<span class="tag '+(BUTTON_TAGS[id]||'tag-blue')+'">'+getButtonLabel(id)+'</span>'; }
 
@@ -524,56 +508,11 @@ async function renderDashboard() {
     }).join('');
     donut.innerHTML='<div style="position:relative;width:160px;height:160px;"><div style="width:160px;height:160px;border-radius:50%;background:conic-gradient('+parts.join(',')+');-webkit-mask:radial-gradient(circle,transparent 55%,black 55.5%);mask:radial-gradient(circle,transparent 55%,black 55.5%);"></div><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;"><div style="font-family:JetBrains Mono,monospace;font-size:1.8rem;font-weight:600;color:var(--text);">'+total+'</div><div style="font-size:.78rem;color:var(--text-muted);">총 클릭</div></div></div><div class="donut-legend">'+legend+'</div>';
   }
-
-  // Gender chart
-  var genderData = {};
-  submissions.forEach(function(s){
-    var g = s.gender || 'unknown';
-    genderData[g] = (genderData[g]||0)+1;
-  });
-  var genderEl = document.getElementById('genderChart');
-  var genderKeys = ['male','female','other','unknown'];
-  var genderLabelsMap = {'male':'남성','female':'여성','other':'기타','unknown':'미입력'};
-  var genderColors = {'male':'var(--blue)','female':'var(--coral)','other':'var(--amber)','unknown':'var(--text-muted)'};
-  var genderMax = Math.max.apply(null, genderKeys.map(function(k){return genderData[k]||0;}).concat([1]));
-  if(submissions.length === 0) {
-    genderEl.innerHTML = '<p style="color:var(--text-muted);padding:20px;text-align:center;">데이터가 없습니다</p>';
-  } else {
-    genderEl.innerHTML = genderKeys.filter(function(k){return genderData[k];}).map(function(k){
-      var count = genderData[k]||0;
-      var pct = Math.round((count/genderMax)*100);
-      return '<div class="demo-bar-item"><div class="demo-bar-label">'+genderLabelsMap[k]+'</div><div class="demo-bar-track"><div class="demo-bar-fill" style="width:'+pct+'%;background:'+genderColors[k]+'">'+Math.round((count/submissions.length)*100)+'%</div></div><div class="demo-bar-count">'+count+'</div></div>';
-    }).join('');
-  }
-
-  // Age chart
-  var ageData = {};
-  submissions.forEach(function(s){
-    var a = s.age || 'unknown';
-    ageData[a] = (ageData[a]||0)+1;
-  });
-  var ageEl = document.getElementById('ageChart');
-  var ageKeys = ['10s','20s','30s','40s','50+','unknown'];
-  var ageLabelsMap = {'10s':'10대','20s':'20대','30s':'30대','40s':'40대','50+':'50대+','unknown':'미입력'};
-  var ageColors = {'10s':'var(--green)','20s':'var(--blue)','30s':'var(--accent)','40s':'var(--amber)','50+':'var(--coral)','unknown':'var(--text-muted)'};
-  var ageMax = Math.max.apply(null, ageKeys.map(function(k){return ageData[k]||0;}).concat([1]));
-  if(submissions.length === 0) {
-    ageEl.innerHTML = '<p style="color:var(--text-muted);padding:20px;text-align:center;">데이터가 없습니다</p>';
-  } else {
-    ageEl.innerHTML = ageKeys.filter(function(k){return ageData[k];}).map(function(k){
-      var count = ageData[k]||0;
-      var pct = Math.round((count/ageMax)*100);
-      return '<div class="demo-bar-item"><div class="demo-bar-label">'+ageLabelsMap[k]+'</div><div class="demo-bar-track"><div class="demo-bar-fill" style="width:'+pct+'%;background:'+ageColors[k]+'">'+Math.round((count/submissions.length)*100)+'%</div></div><div class="demo-bar-count">'+count+'</div></div>';
-    }).join('');
-  }
-
-  // Submissions table (with gender/age)
+  // Submissions table
   document.getElementById('submissionsTable').innerHTML = submissions.length===0
-    ? '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">데이터가 없습니다</td></tr>'
+    ? '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">데이터가 없습니다</td></tr>'
     : submissions.slice().reverse().map(function(s){
-      var gLabel = GENDER_LABELS[s.gender] || (s.gender ? s.gender : '—');
-      var aLabel = AGE_LABELS[s.age] || (s.age ? s.age : '—');
-      return '<tr><td>'+formatTime(s.timestamp)+'</td><td style="font-family:Noto Sans KR,sans-serif;">'+s.name+'</td><td>'+s.phone+'</td><td>'+(s.email||'—')+'</td><td>'+gLabel+'</td><td>'+aLabel+'</td><td>'+(s.utm_source||'<span style="color:var(--text-muted)">—</span>')+'</td></tr>';
+      return '<tr><td>'+formatTime(s.timestamp)+'</td><td style="font-family:Noto Sans KR,sans-serif;">'+s.name+'</td><td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(s.email||'—')+'</td><td>'+(s.utm_source||'<span style="color:var(--text-muted)">—</span>')+'</td></tr>';
     }).join('');
   document.getElementById('subCount').textContent = submissions.length+'건';
 
@@ -605,8 +544,6 @@ async function exportExcel() {
   var d = await getAnalytics();
   var wb = XLSX.utils.book_new();
 
-  var GENDER_LABELS_XL = {'male':'남성','female':'여성','other':'기타'};
-  var AGE_LABELS_XL = {'10s':'10대','20s':'20대','30s':'30대','40s':'40대','50+':'50대 이상'};
   var BUTTON_LABELS_XL = {
     'nav_cta':'[상단 네비] 사전예약만 해도 케어젤 무료',
     'hero_cta_primary':'[히어로] 케어 젤 3종 무료 증정',
@@ -651,7 +588,7 @@ async function exportExcel() {
     ['지표', '값', '설명'],
     ['총 방문수',          totalV,          '페이지 접속 총 횟수'],
     ['총 CTA 클릭수',      totalC,          'CTA 버튼 전체 클릭 합계'],
-    ['총 신청 완료수',     totalS,          '이름·연락처 입력 후 신청 완료'],
+    ['총 신청 완료수',     totalS,          '이름·이메일 입력 후 신청 완료'],
     ['CTA 클릭 전환율',   ctaConvRate+'%', 'CTA 클릭 / 방문수 × 100'],
     ['신청 전환율',        subConvRate+'%', '신청 완료 / 방문수 × 100'],
     ['클릭→신청 전환율',  clickToSub+'%',  '신청 완료 / CTA 클릭수 × 100'],
@@ -691,7 +628,6 @@ async function exportExcel() {
       s.utm_campaign||''
     ]);
   });
-  if(d.submissions.length === 0) subRows.push(['신청 데이터 없음']);
 
   var wsSub = XLSX.utils.aoa_to_sheet(subRows);
   wsSub['!cols'] = [{wch:20},{wch:12},{wch:26},{wch:12},{wch:16},{wch:16},{wch:22}];
