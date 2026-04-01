@@ -302,7 +302,7 @@ tbody tr:hover{background:var(--surface-2)}
       <div style="font-size:.85rem;color:var(--text-sub);" id="subCount">0건</div>
     </div>
     <div style="overflow-x:auto;">
-      <table style="table-layout:fixed;width:100%;"><colgroup><col style="width:180px"><col style="width:120px"><col style="width:auto"><col style="width:140px"></colgroup><thead><tr><th>시간</th><th>이름</th><th>이메일</th><th>UTM Source</th></tr></thead>
+      <table style="table-layout:fixed;width:100%;"><colgroup><col style="width:200px"><col style="width:120px"><col style="width:auto"><col style="width:130px"></colgroup><thead><tr><th style="white-space:nowrap;">시간</th><th>이름</th><th>이메일</th><th>UTM Source</th></tr></thead>
       <tbody id="submissionsTable"><tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">데이터가 없습니다</td></tr></tbody></table>
     </div>
   </div>
@@ -512,7 +512,7 @@ async function renderDashboard() {
   document.getElementById('submissionsTable').innerHTML = submissions.length===0
     ? '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">데이터가 없습니다</td></tr>'
     : submissions.slice().reverse().map(function(s){
-      return '<tr><td>'+formatTime(s.timestamp)+'</td><td style="font-family:Noto Sans KR,sans-serif;">'+s.name+'</td><td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(s.email||'—')+'</td><td>'+(s.utm_source||'<span style="color:var(--text-muted)">—</span>')+'</td></tr>';
+      return '<tr><td style="white-space:nowrap;">'+formatTime(s.timestamp)+'</td><td style="font-family:Noto Sans KR,sans-serif;">'+s.name+'</td><td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(s.email||'—')+'</td><td>'+(s.utm_source||'<span style="color:var(--text-muted)">—</span>')+'</td></tr>';
     }).join('');
   document.getElementById('subCount').textContent = submissions.length+'건';
 
